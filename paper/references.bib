@@ -1,0 +1,178 @@
+% =============================================================================
+% references.bib — Progressive Contextual Token Dropping
+% =============================================================================
+
+% ─── Temel Referanslar ───────────────────────────────────────────────────────
+
+@inproceedings{devlin2019bert,
+  title     = {{BERT}: Pre-training of Deep Bidirectional Transformers for
+               Language Understanding},
+  author    = {Devlin, Jacob and Chang, Ming-Wei and Lee, Kenton and
+               Toutanova, Kristina},
+  booktitle = {Proceedings of NAACL-HLT},
+  year      = {2019},
+  pages     = {4171--4186},
+  publisher = {Association for Computational Linguistics},
+  url       = {https://aclanthology.org/N19-1423},
+}
+
+@article{liu2019roberta,
+  title   = {{RoBERTa}: A Robustly Optimized {BERT} Pretraining Approach},
+  author  = {Liu, Yinhan and Ott, Myle and Goyal, Naman and Du, Jingfei and
+             Joshi, Mandar and Chen, Danqi and Levy, Omer and Lewis, Mike and
+             Zettlemoyer, Luke and Stoyanov, Veselin},
+  journal = {arXiv preprint arXiv:1907.11692},
+  year    = {2019},
+}
+
+% ─── Doğrudan Baseline ───────────────────────────────────────────────────────
+
+@inproceedings{hou2022tokendrop,
+  title     = {Token Dropping for Efficient {BERT} Pretraining},
+  author    = {Hou, Le and Pang, Richard Yuanzhe and Zhou, Tianyi and Wu, Yuexin
+               and Song, Xinying and Song, Xiaodan and Zhou, Denny},
+  booktitle = {Proceedings of ACL},
+  year      = {2022},
+  pages     = {3774--3784},
+  publisher = {Association for Computational Linguistics},
+  url       = {https://aclanthology.org/2022.acl-long.262},
+}
+
+% ─── En Yakın Rakip ──────────────────────────────────────────────────────────
+
+@inproceedings{zhang2023sctd,
+  title     = {Structured Context-based Token Dropping for {BERT}},
+  author    = {Zhang, Yuxuan and others},
+  booktitle = {Proceedings of ACL},
+  year      = {2023},
+  publisher = {Association for Computational Linguistics},
+  note      = {To verify exact citation details before submission.},
+}
+
+% ─── Inference-time Token Dropping ───────────────────────────────────────────
+
+@inproceedings{goyal2020power,
+  title     = {{PoWER-BERT}: Accelerating {BERT} Inference via Progressive
+               Word-vector Elimination},
+  author    = {Goyal, Saurabh and Choudhury, Anamitra Roy and Raje, Saurabh and
+               Chakarabarti, Venkatesan and Awasthi, Ayush and Netrapalli, Praneeth},
+  booktitle = {Proceedings of ICML},
+  year      = {2020},
+  pages     = {3690--3699},
+}
+
+@inproceedings{ye2021trbert,
+  title     = {{TR-BERT}: Dynamic Token Reduction for Accelerating {BERT}
+               Inference},
+  author    = {Ye, Deming and Lin, Yankai and Du, Yufei and Liu, Zhenghao and
+               Sun, Maosong and Liu, Zhiyuan},
+  booktitle = {Proceedings of NAACL-HLT},
+  year      = {2021},
+  pages     = {5798--5809},
+  publisher = {Association for Computational Linguistics},
+  url       = {https://aclanthology.org/2021.naacl-main.463},
+}
+
+@inproceedings{zhu2021ltp,
+  title     = {Dynamic Token-Weighting for Language-Model Pre-Training},
+  author    = {Zhu, Wentao and others},
+  booktitle = {arXiv preprint},
+  year      = {2021},
+  note      = {Verify citation before submission.},
+}
+
+@article{modarressi2022adapterdrop,
+  title   = {{AdapterDrop}: On the Efficiency of Adapters in Transformers},
+  author  = {Modarressi, Ali and others},
+  journal = {arXiv preprint arXiv:2010.11918},
+  year    = {2022},
+}
+
+% ─── Distillation / Pruning ──────────────────────────────────────────────────
+
+@inproceedings{sanh2019distilbert,
+  title     = {{DistilBERT}, a distilled version of {BERT}: smaller, faster,
+               cheaper and lighter},
+  author    = {Sanh, Victor and Debut, Lysandre and Chaumond, Julien and
+               Wolf, Thomas},
+  booktitle = {5th Workshop on Energy Efficient Machine Learning and Cognitive
+               Computing (NeurIPS)},
+  year      = {2019},
+}
+
+@inproceedings{michel2019heads,
+  title     = {Are Sixteen Heads Really Better than One?},
+  author    = {Michel, Paul and Levy, Omer and Neubig, Graham},
+  booktitle = {NeurIPS},
+  year      = {2019},
+}
+
+% ─── Optimizasyon ────────────────────────────────────────────────────────────
+
+@inproceedings{loshchilov2019adamw,
+  title     = {Decoupled Weight Decay Regularization},
+  author    = {Loshchilov, Ilya and Hutter, Frank},
+  booktitle = {ICLR},
+  year      = {2019},
+}
+
+% ─── Veri ────────────────────────────────────────────────────────────────────
+
+@inproceedings{zhu2015aligning,
+  title     = {Aligning Books and Movies: Towards Story-like Visual Explanations
+               by Watching Movies and Reading Books},
+  author    = {Zhu, Yukun and Kiros, Ryan and Zemel, Rich and Salakhutdinov,
+               Ruslan and Urtasun, Raquel and Torralba, Antonio and Fidler, Sanja},
+  booktitle = {ICCV},
+  year      = {2015},
+}
+
+% ─── Değerlendirme ───────────────────────────────────────────────────────────
+
+@inproceedings{wang2018glue,
+  title     = {{GLUE}: A Multi-Task Benchmark and Analysis Platform for Natural
+               Language Understanding},
+  author    = {Wang, Alex and Singh, Amanpreet and Michael, Julian and Hill, Felix
+               and Levy, Omer and Bowman, Samuel},
+  booktitle = {EMNLP Workshop: BlackboxNLP},
+  year      = {2018},
+  url       = {https://aclanthology.org/W18-5446},
+}
+
+@inproceedings{rajpurkar2016squad,
+  title     = {{SQuAD}: 100,000+ Questions for Machine Comprehension of Text},
+  author    = {Rajpurkar, Pranav and Zhang, Jian and Lopyrev, Konstantin and
+               Liang, Percy},
+  booktitle = {Proceedings of EMNLP},
+  year      = {2016},
+  pages     = {2383--2392},
+  publisher = {Association for Computational Linguistics},
+}
+
+@inproceedings{rajpurkar2018know,
+  title     = {Know What You Don't Know: Unanswerable Questions for {SQuAD}},
+  author    = {Rajpurkar, Pranav and Jia, Robin and Liang, Percy},
+  booktitle = {Proceedings of ACL},
+  year      = {2018},
+  pages     = {784--789},
+}
+
+% ─── Transformer Mimarisi ────────────────────────────────────────────────────
+
+@inproceedings{vaswani2017attention,
+  title     = {Attention Is All You Need},
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and Uszkoreit,
+               Jakob and Jones, Llion and Gomez, Aidan N and Kaiser, {\L}ukasz and
+               Polosukhin, Illia},
+  booktitle = {NeurIPS},
+  year      = {2017},
+}
+
+@article{clark2020electra,
+  title   = {{ELECTRA}: Pre-training Text Encoders as Discriminators Rather
+             Than Generators},
+  author  = {Clark, Kevin and Luong, Minh-Thang and Le, Quoc V and Manning,
+             Christopher D},
+  journal = {ICLR},
+  year    = {2020},
+}

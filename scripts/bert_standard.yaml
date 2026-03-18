@@ -1,0 +1,30 @@
+# Kontrol: Dropping olmayan standart BERT-base konfigürasyonu.
+#
+# Tam eğitim aşamasında (Aşama 3) üç model karşılaştırılır:
+#   1. Bu dosya (bert_standard.yaml)        → BERT-base, dropping yok
+#   2. bert_en_uncased_base_token_drop.yaml → Baseline Token Dropping (ACL 2022)
+#   3. bert_progressive_drop.yaml           → Progressive Contextual Drop (yeni)
+#
+# Kullanım:
+#   python train.py \
+#     --experiment=bert/pretraining \
+#     --config_file=wiki_books_pretrain_sequence_pack.yaml \
+#     --config_file=scripts/bert_standard.yaml
+
+task:
+  model:
+    encoder:
+      type: bert_encoder
+      bert_encoder:
+        attention_dropout_rate: 0.1
+        dropout_rate: 0.1
+        hidden_activation: gelu
+        hidden_size: 768
+        initializer_range: 0.02
+        intermediate_size: 3072
+        max_position_embeddings: 512
+        num_attention_heads: 12
+        num_layers: 12
+        type_vocab_size: 2
+        vocab_size: 30522
+        # Token dropping YOK — tüm tokenlar tüm katmanlarda işlenir

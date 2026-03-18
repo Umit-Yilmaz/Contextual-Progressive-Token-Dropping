@@ -1,0 +1,32 @@
+% =============================================================================
+% tables/efficiency.tex — Hesaplama verimliliği karşılaştırması
+% =============================================================================
+
+\begin{table}[t]
+\centering
+\small
+\caption{
+  Pre-training efficiency comparison.
+  Throughput measured as sequences/second on a single A100 80GB GPU
+  with sequence length 512.
+  Attn.\ FLOPs = total self-attention FLOPs per forward pass (batch=1).
+  Non-trainable = vocabulary importance table size.
+}
+\label{tab:efficiency}
+\begin{tabular}{lrrrr}
+\toprule
+\textbf{Model}
+  & \textbf{Thrput.} & \textbf{Attn.\ FLOPs} & \textbf{Speedup}
+  & \textbf{Non-trainable} \\
+  & (seq/s) & (GFLOPs) & vs.\ full & params \\
+\midrule
+\bertbase{}        & --   & -- & 1.00$\times$  & 0 \\
+\baseline{}        & --   & -- & --$\times$  & 30,522 \\
+\model{} (ours)    & --   & -- & --$\times$  & 0 \\
+\bottomrule
+\end{tabular}
+% TODO: fill with real measurements from experiments/run_experiments.py (full-scale)
+% Synthetic results (seq=128, hidden=256, 8 layers):
+%   Baseline:    290 ms/batch, 86,016 attn-FLOPs proxy
+%   Progressive: 262 ms/batch, 76,800 attn-FLOPs proxy (-10.7%, -9.8% time)
+\end{table}

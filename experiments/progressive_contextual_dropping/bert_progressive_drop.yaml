@@ -1,0 +1,49 @@
+# Model configuration for Progressive Contextual Drop BERT-base.
+#
+# Use alongside wiki_books_pretrain_sequence_pack.yaml (from the repo root):
+#
+#   python train.py \
+#     --experiment=progressive_drop_bert/pretraining \
+#     --config_file=../../wiki_books_pretrain_sequence_pack.yaml \
+#     --config_file=bert_progressive_drop.yaml \
+#     --params_override="task.train_data.input_path=/path/to/train,..."\
+#     --model_dir=/path/to/output \
+#     --mode=train_and_eval
+#
+# All values below mirror bert_en_uncased_base_token_drop.yaml except the
+# three token_keep_k* fields which replace the single token_keep_k field.
+
+task:
+  model:
+    encoder:
+      type: any
+      any:
+        # ── Special-token overrides ──────────────────────────────────────────
+        token_allow_list: !!python/tuple
+        - 100  # [UNK]
+        - 101  # [CLS]
+        - 102  # [SEP]
+        - 103  # [MASK]
+        token_deny_list: !!python/tuple
+        - 0    # [PAD]
+
+        # ── Standard BERT-base architecture ─────────────────────────────────
+        attention_dropout_rate: 0.1
+        dropout_rate: 0.1
+        hidden_activation: gelu
+        hidden_size: 768
+        initializer_range: 0.02
+        intermediate_size: 3072
+        max_position_embeddings: 512
+        num_attention_heads: 12
+        num_layers: 12
+        type_vocab_size: 2
+        vocab_size: 30522
+
+        # ── Progressive drop budgets ─────────────────────────────────────────
+        # Stage 1 (after layer  3): 512 → 384  (keep 75 %)
+        token_keep_k1: 384
+        # Stage 2 (after layer  6): 384 → 256  (keep 50 %)
+        token_keep_k2: 256
+        # Stage 3 (after layer  9): 256 → 128  (keep 25 %)
+        token_keep_k3: 128

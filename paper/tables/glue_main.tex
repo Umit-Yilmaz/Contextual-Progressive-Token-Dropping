@@ -1,0 +1,43 @@
+% =============================================================================
+% tables/glue_main.tex — Ana GLUE sonuç tablosu
+% analysis/glue_results_table.py tarafından otomatik üretilir.
+% Gerçek sonuçlar elde edildikten sonra bu dosya güncellenecektir.
+% =============================================================================
+
+\begin{table*}[t]
+\centering
+\small
+\caption{
+  GLUE benchmark results (\%).
+  All models use BERT-base architecture (12 layers, $d$=768).
+  Results are averaged over 5 random seeds; best scores per column are \textbf{bold}.
+  $^\dagger$ Reference values from~\citet{devlin2019bert}.
+}
+\label{tab:glue_main}
+\begin{tabular}{lccccccccccc}
+\toprule
+ & \multicolumn{9}{c}{\textbf{GLUE Tasks}} & \\
+\cmidrule(lr){2-10}
+\textbf{Model}
+  & \textbf{CoLA} & \textbf{SST-2} & \textbf{MRPC}  & \textbf{STS-B}
+  & \textbf{QQP}  & \textbf{MNLI}  & \textbf{QNLI}  & \textbf{RTE}
+  & \textbf{WNLI} & \textbf{Avg.} \\
+\midrule
+\bertbase{}$^\dagger$
+  & 52.1 & 93.5 & 88.9 & 85.8
+  & 71.2 & 84.6 & 90.5 & 66.4
+  & 65.1 & 77.6 \\
+\baseline{}~\citep{hou2022tokendrop}
+  & -- & -- & -- & --
+  & -- & -- & -- & --
+  & -- & -- \\
+\midrule
+\model{} (ours)
+  & -- & -- & -- & --
+  & -- & -- & -- & --
+  & -- & -- \\
+\bottomrule
+\end{tabular}
+% TODO: fill -- fields with actual results from run_glue.sh output
+% Run: python analysis/glue_results_table.py --glue_results results/glue/summary.json
+\end{table*}

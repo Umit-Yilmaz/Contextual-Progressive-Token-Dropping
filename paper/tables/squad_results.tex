@@ -1,0 +1,27 @@
+% =============================================================================
+% tables/squad_results.tex — SQuAD sonuç tablosu
+% =============================================================================
+
+\begin{table}[t]
+\centering
+\small
+\caption{
+  SQuAD reading comprehension results.
+  EM = Exact Match, F1 = token-overlap F1.
+  Averaged over 3 random seeds.
+}
+\label{tab:squad}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{\textbf{SQuAD v1.1}} & \multicolumn{2}{c}{\textbf{SQuAD v2.0}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+\textbf{Model} & \textbf{EM} & \textbf{F1} & \textbf{EM} & \textbf{F1} \\
+\midrule
+\bertbase{} & 80.8 & 88.5 & 74.2 & 77.4 \\
+\baseline{} & -- & -- & -- & -- \\
+\midrule
+\model{} (ours) & -- & -- & -- & -- \\
+\bottomrule
+\end{tabular}
+% TODO: fill with real results from run_squad.sh
+\end{table}

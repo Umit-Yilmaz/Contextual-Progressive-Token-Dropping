@@ -1,0 +1,59 @@
+# Pivot C — 2-Aşamalı Progressive Drop Konfigürasyonu
+#
+# Tetikleyici: 3-aşamalı dropping momentum sorunlarına yol açıyorsa
+# (her aşamada attention mask boyutu değişiyor, gradient flow bozuluyor).
+#
+# Çözüm: 3 drop noktası yerine 2 drop noktası kullan.
+#   Aşama 1 (after layer  4): 512 → 320  (keep 62.5%)
+#   Aşama 2 (after layer  8): 320 → 128  (keep 25%)
+#
+# Bu konfigürasyon encoder.py'nin num_drop_stages=2 modunu etkinleştirir.
+# NOT: encoder.py'de `num_drop_stages` parametresi uygulanmalıdır (Pivot C gerekliyse).
+#
+# Beklenen etki:
+#   + Daha az boyut değişimi → gradient flow daha stabil
+#   + Daha az maskeleme overhead'i (2 vs 3 maskeleme operasyonu)
+#   - Aşama başına daha agresif eleme (her seferinde daha büyük atlama)
+#
+# Kullanım:
+#   python train.py \
+#     --experiment=progressive_drop_bert/pretraining \
+#     --config_file=wiki_books_pretrain_sequence_pack.yaml \
+#     --config_file=experiments/progressive_contextual_dropping/bert_progressive_2stage.yaml
+
+task:
+  model:
+    encoder:
+      type: any
+      any:
+        # ── Special-token overrides ──────────────────────────────────────────
+        token_allow_list: !!python/tuple
+        - 100  # [UNK]
+        - 101  # [CLS]
+        - 102  # [SEP]
+        - 103  # [MASK]
+        token_deny_list: !!python/tuple
+        - 0    # [PAD]
+
+        # ── Standard BERT-base architecture ─────────────────────────────────
+        attention_dropout_rate: 0.1
+        dropout_rate: 0.1
+        hidden_activation: gelu
+        hidden_size: 768
+        initializer_range: 0.02
+        intermediate_size: 3072
+        max_position_embeddings: 512
+        num_attention_heads: 12
+        num_layers: 12
+        type_vocab_size: 2
+        vocab_size: 30522
+
+        # ── 2-aşamalı drop budgets (seq_len=512 için) ───────────────────────
+        # Stage 1 (after layer  4): 512 → 320  (keep 62.5%)
+        token_keep_k1: 320
+        # Stage 2 (after layer  8): 320 → 128  (keep 25.0%)
+        token_keep_k2: 128
+        # Stage 3 değeri — bu konfigürasyonda kullanılmaz (k2=k3 ile devre dışı)
+        token_keep_k3: 128
+        # NOT: encoder.py'de k2 == k3 koşulu 3. dropping'i atlar.
+        # Tam Pivot C desteği için encoder.py'de num_drop_stages parametresi eklenmelidir.

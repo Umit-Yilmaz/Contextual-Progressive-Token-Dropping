@@ -1,0 +1,54 @@
+# Pivot B — Dropping Warmup Konfigürasyonu
+#
+# Tetikleyici: İlk 5k adımda progressive model baseline'dan >%15 yavaş yakınsar.
+#
+# Sorun: Eğitim başında ağırlıklar rastgele → L2 normlar neredeyse eşit →
+# Dropping kararları rastgele → Model kaliteli token öğrenemeden token kaybediyor.
+#
+# Çözüm: İlk warmup_drop_steps adımda tüm tokenlar korunur (dropping devre dışı).
+# Bu konfigürasyon encoder.py'nin warmup_drop_steps parametresini etkinleştirir.
+#
+# Kullanım:
+#   python train.py \
+#     --experiment=progressive_drop_bert/pretraining \
+#     --config_file=wiki_books_pretrain_sequence_pack.yaml \
+#     --config_file=experiments/progressive_contextual_dropping/bert_progressive_warmup.yaml
+
+task:
+  model:
+    encoder:
+      type: any
+      any:
+        # ── Special-token overrides ──────────────────────────────────────────
+        token_allow_list: !!python/tuple
+        - 100  # [UNK]
+        - 101  # [CLS]
+        - 102  # [SEP]
+        - 103  # [MASK]
+        token_deny_list: !!python/tuple
+        - 0    # [PAD]
+
+        # ── Standard BERT-base architecture ─────────────────────────────────
+        attention_dropout_rate: 0.1
+        dropout_rate: 0.1
+        hidden_activation: gelu
+        hidden_size: 768
+        initializer_range: 0.02
+        intermediate_size: 3072
+        max_position_embeddings: 512
+        num_attention_heads: 12
+        num_layers: 12
+        type_vocab_size: 2
+        vocab_size: 30522
+
+        # ── Progressive drop budgets (seq_len=512 için) ──────────────────────
+        token_keep_k1: 384   # 75%
+        token_keep_k2: 256   # 50%
+        token_keep_k3: 128   # 25%
+
+        # ── Pivot B: Dropping warmup ─────────────────────────────────────────
+        # İlk 10k adımda dropping devre dışı; sonra kademeli devreye girer.
+        # NOT: Bu parametre encoder.py'de uygulanmalıdır (Pivot B gerekliyse).
+        # encoder.py call() içine şu koşul eklenmelidir:
+        #   drop_active = (global_step >= self._warmup_drop_steps)
+        warmup_drop_steps: 10000

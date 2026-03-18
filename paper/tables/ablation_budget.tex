@@ -1,0 +1,30 @@
+% =============================================================================
+% tables/ablation_budget.tex — Bütçe ablasyon tablosu
+% =============================================================================
+
+\begin{table}[t]
+\centering
+\small
+\caption{
+  Ablation: token budget $(k_1, k_2, k_3)$ vs.\ quality and efficiency
+  (SST-2 accuracy, GLUE average, relative FLOP reduction).
+  All models trained for 200k steps, seq length 128.
+}
+\label{tab:ablation_budget}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Config}
+  & $k_1$ & $k_2$ & $k_3$
+  & \textbf{SST-2} & \textbf{GLUE Avg.} \\
+\midrule
+Full (no drop)         & 512 & 512 & 512 & -- & -- \\
+\baseline{} ($k$=256)  & —   & 256 & —   & -- & -- \\
+\midrule
+Aggressive             & 320 & 192 & 96  & -- & -- \\
+\textbf{Default (ours)}& 384 & 256 & 128 & -- & -- \\
+Moderate               & 416 & 320 & 192 & -- & -- \\
+Conservative           & 448 & 384 & 256 & -- & -- \\
+\bottomrule
+\end{tabular}
+% TODO: fill with ablation results (scripts/train_short.sh --phase 2)
+\end{table}

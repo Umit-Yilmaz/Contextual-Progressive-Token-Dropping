@@ -1,0 +1,58 @@
+# Pivot D — Muhafazakâr Token Bütçe Konfigürasyonu
+#
+# Tetikleyici: k3=128 (%75 eleme) downstream görevlerde ciddi kalite kaybına
+# yol açıyorsa (Aşama 2 GLUE sonuçları baseline − >1% ise).
+#
+# Çözüm: Daha az agresif token eleme oranları.
+#   k1=448 → %87.5 korunuyor (sadece %12.5 eleniyor)
+#   k2=384 → %75.0 korunuyor
+#   k3=256 → %50.0 korunuyor  (varsayılan %25'e karşı)
+#
+# Beklenen etki:
+#   + Daha az downstream kalite kaybı
+#   + Daha iyi convergence stabilitesi
+#   - Daha az hesaplama tasarrufu (~%20 yerine ~%50)
+#
+# Kullanım:
+#   python train.py \
+#     --experiment=progressive_drop_bert/pretraining \
+#     --config_file=wiki_books_pretrain_sequence_pack.yaml \
+#     --config_file=experiments/progressive_contextual_dropping/bert_progressive_conservative.yaml
+
+task:
+  model:
+    encoder:
+      type: any
+      any:
+        # ── Special-token overrides ──────────────────────────────────────────
+        token_allow_list: !!python/tuple
+        - 100  # [UNK]
+        - 101  # [CLS]
+        - 102  # [SEP]
+        - 103  # [MASK]
+        token_deny_list: !!python/tuple
+        - 0    # [PAD]
+
+        # ── Standard BERT-base architecture ─────────────────────────────────
+        attention_dropout_rate: 0.1
+        dropout_rate: 0.1
+        hidden_activation: gelu
+        hidden_size: 768
+        initializer_range: 0.02
+        intermediate_size: 3072
+        max_position_embeddings: 512
+        num_attention_heads: 12
+        num_layers: 12
+        type_vocab_size: 2
+        vocab_size: 30522
+
+        # ── Muhafazakâr progressive drop budgets ─────────────────────────────
+        # Stage 1 (after layer  3): 512 → 448  (keep 87.5%, drop 12.5%)
+        token_keep_k1: 448
+        # Stage 2 (after layer  6): 448 → 384  (keep 75.0%, drop 25.0%)
+        token_keep_k2: 384
+        # Stage 3 (after layer  9): 384 → 256  (keep 50.0%, drop 50.0%)
+        token_keep_k3: 256
+
+# NOT: Ablasyon deneyi olarak da kullanılabilir.
+# PLAN.md §9 Ablasyon D'de bu konfigürasyon referans alınır.
