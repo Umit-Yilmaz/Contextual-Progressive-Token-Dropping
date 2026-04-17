@@ -162,7 +162,8 @@ def save_step_log(log_path, model_name, global_step, loss, acc):
 
 # ── Data loading ───────────────────────────────────────────────────────────────
 
-def load_csv_data(csv_path, max_samples=None, val_ratio=0.05, seed=42):
+def load_csv_data(csv_path, max_samples=None, val_ratio=0.05, test_ratio=0.05,
+                   seed=42):
     """Load bookcorpus_static_mlm.csv into numpy arrays.
 
     CSV format (created by HuggingFace static-MLM pipeline):
@@ -171,7 +172,7 @@ def load_csv_data(csv_path, max_samples=None, val_ratio=0.05, seed=42):
       labels          – -100=non-masked, true_token_id=masked
 
     Returns:
-      (train_data, val_data) each a dict with keys
+      (train_data, val_data, test_data) each a dict with keys
       'input_ids', 'attention_mask', 'labels'  (np.int32 arrays).
     """
     print(f"\n{C.CYAN}Loading CSV data:{C.RESET} {csv_path}")
@@ -194,27 +195,32 @@ def load_csv_data(csv_path, max_samples=None, val_ratio=0.05, seed=42):
     labels         = np.array(lbl_list,  dtype=np.int32)
     n, seq_len     = input_ids.shape
 
-    # Shuffle + split
+    # Shuffle + 3-way split (train / val / test)
     rng = np.random.default_rng(seed)
     perm = rng.permutation(n)
+    n_test  = max(1, int(n * test_ratio))
     n_val   = max(1, int(n * val_ratio))
-    n_train = n - n_val
+    n_train = n - n_val - n_test
 
-    def _split(arr):
-        return arr[perm[:n_train]], arr[perm[n_train:]]
+    idx_train = perm[:n_train]
+    idx_val   = perm[n_train:n_train + n_val]
+    idx_test  = perm[n_train + n_val:]
 
-    tr_ids,  va_ids  = _split(input_ids)
-    tr_mask, va_mask = _split(attention_mask)
-    tr_lbl,  va_lbl  = _split(labels)
-
-    train_data = dict(input_ids=tr_ids, attention_mask=tr_mask, labels=tr_lbl)
-    val_data   = dict(input_ids=va_ids, attention_mask=va_mask, labels=va_lbl)
+    train_data = dict(input_ids=input_ids[idx_train],
+                      attention_mask=attention_mask[idx_train],
+                      labels=labels[idx_train])
+    val_data   = dict(input_ids=input_ids[idx_val],
+                      attention_mask=attention_mask[idx_val],
+                      labels=labels[idx_val])
+    test_data  = dict(input_ids=input_ids[idx_test],
+                      attention_mask=attention_mask[idx_test],
+                      labels=labels[idx_test])
 
     masked_per_sample = (labels != -100).sum(axis=1).mean()
-    print(f"  Samples  : {n:,}  (train={n_train:,}, val={n_val:,})")
+    print(f"  Samples  : {n:,}  (train={n_train:,}, val={n_val:,}, test={n_test:,})")
     print(f"  Seq len  : {seq_len}")
     print(f"  Masked/s : ~{masked_per_sample:.1f} tokens ({masked_per_sample/seq_len*100:.1f}%)")
-    return train_data, val_data
+    return train_data, val_data, test_data
 
 
 def make_tf_dataset(data, batch_size, shuffle=True, seed=0):
@@ -581,9 +587,10 @@ def print_comparison(results, threshold=0.10, speed_threshold=0.85):
     print(f"{C.BOLD}  3-Way Comparison — Final Results{C.RESET}")
     print(f"{C.BOLD}{'═' * 70}{C.RESET}")
     header = (f"  {'Model':<22} {'Val Loss':>9} {'Val Acc':>8} "
-              f"{'Val PPL':>8} {'Train Loss':>10} {'Best Ep':>7} {'Steps/s':>8}")
+              f"{'Test Loss':>10} {'Test Acc':>9} "
+              f"{'Train Loss':>10} {'Best Ep':>7} {'Steps/s':>8}")
     print(header)
-    print(f"  {'─'*22} {'─'*9} {'─'*8} {'─'*8} {'─'*10} {'─'*7} {'─'*8}")
+    print(f"  {'─'*22} {'─'*9} {'─'*8} {'─'*10} {'─'*9} {'─'*10} {'─'*7} {'─'*8}")
 
     color_map = {'vanilla': C.BLUE, 'tokendrop': C.YELLOW, 'progressive': C.GREEN}
     for name, r in results.items():
@@ -591,7 +598,8 @@ def print_comparison(results, threshold=0.10, speed_threshold=0.85):
         print(f"  {c}{name:<22}{C.RESET}"
               f" {r['val_loss']:>9.4f}"
               f" {r['val_acc']:>8.4f}"
-              f" {r['val_ppl']:>8.2f}"
+              f" {r.get('test_loss', 0):>10.4f}"
+              f" {r.get('test_acc', 0):>9.4f}"
               f" {r['train_loss']:>10.4f}"
               f" {r.get('best_epoch', '-'):>7}"
               f" {r.get('steps_per_second', 0):>8.1f}")
@@ -651,8 +659,9 @@ def save_results_csv(results, out_dir):
     """Save comparison CSV to {out_dir}/results_summary.csv."""
     path = os.path.join(out_dir, 'results_summary.csv')
     fields = ['model', 'val_loss', 'val_acc', 'val_ppl',
+              'test_loss', 'test_acc', 'test_ppl',
               'train_loss', 'train_acc', 'best_val_loss', 'best_epoch',
-              'steps_per_second', 'global_step']
+              'steps_per_second', 'forward_latency_ms', 'global_step']
     with open(path, 'w', newline='', encoding='utf-8') as f:
         w = csv.DictWriter(f, fieldnames=fields, extrasaction='ignore')
         w.writeheader()
@@ -677,6 +686,7 @@ def parse_args():
     p.add_argument('--max_samples', type=int, default=0,
                    help='Limit dataset rows (0 = all)')
     p.add_argument('--val_ratio',   type=float, default=0.05)
+    p.add_argument('--test_ratio',  type=float, default=0.05)
 
     # Training
     p.add_argument('--epochs',        type=int,   default=5)
@@ -760,13 +770,15 @@ def main():
           f"early_stop_patience={args.early_stopping_patience}")
 
     # Load data
-    train_data, val_data = load_csv_data(
+    train_data, val_data, test_data = load_csv_data(
         args.data_path,
         max_samples=args.max_samples or None,
-        val_ratio=args.val_ratio)
+        val_ratio=args.val_ratio,
+        test_ratio=args.test_ratio)
 
     train_ds = make_tf_dataset(train_data, args.batch_size, shuffle=True)
     val_ds   = make_tf_dataset(val_data,   args.batch_size, shuffle=False)
+    test_ds  = make_tf_dataset(test_data,  args.batch_size, shuffle=False)
 
     # ── LR schedule parameters (computed once, shared across models) ──────────
     n_train         = len(train_data['input_ids'])
@@ -792,9 +804,49 @@ def main():
         results[name] = train_one_model(
             name, model, color, train_ds, val_ds, args, log_dir,
             total_steps=total_steps, warmup_steps=warmup_steps)
+
+        # ── Test set evaluation (using best checkpoint) ───────────────────────
+        best_ckpt = os.path.join(log_dir, 'best_model.weights.h5')
+        if os.path.exists(best_ckpt):
+            model.load_weights(best_ckpt)
+            print(f"  {color}Evaluating {name} on test set "
+                  f"(best epoch {results[name]['best_epoch']})...{C.RESET}")
+        te_losses, te_accs = [], []
+        for batch in test_ds:
+            tl, ta = eval_step(model, batch)
+            te_losses.append(float(tl))
+            te_accs.append(float(ta))
+        te_loss = sum(te_losses) / max(len(te_losses), 1)
+        te_acc  = sum(te_accs)   / max(len(te_accs), 1)
+        te_ppl  = math.exp(min(te_loss, 20))
+        results[name]['test_loss'] = te_loss
+        results[name]['test_acc']  = te_acc
+        results[name]['test_ppl']  = te_ppl
+        print(f"  {color}[{name}] Test: loss={te_loss:.4f}  "
+              f"acc={te_acc:.4f}  ppl={te_ppl:.2f}{C.RESET}")
+
+        # ── Forward-pass latency measurement ──────────────────────────────────
+        print(f"  {color}Measuring {name} forward-pass latency...{C.RESET}")
+        sample_batch = next(iter(train_ds))
+        # Warmup (3 runs)
+        for _ in range(3):
+            _out = model(sample_batch, training=False)
+            tf.reduce_sum(_out).numpy()
+        # Timed runs (10 runs)
+        _lat_times = []
+        for _ in range(10):
+            _t0 = time.perf_counter()
+            _out = model(sample_batch, training=False)
+            tf.reduce_sum(_out).numpy()
+            _lat_times.append((time.perf_counter() - _t0) * 1000)
+        latency_ms = sum(_lat_times) / len(_lat_times)
+        results[name]['forward_latency_ms'] = round(latency_ms, 3)
+        print(f"  {color}[{name}] Latency: {latency_ms:.2f} ms / batch{C.RESET}")
+
         run_logger.info(
             f"[{name}] finished | val_loss={results[name]['val_loss']:.4f} | "
             f"val_acc={results[name]['val_acc']:.4f} | "
+            f"test_loss={te_loss:.4f} | test_acc={te_acc:.4f} | "
             f"best_epoch={results[name]['best_epoch']}")
 
     # ── Final comparison + persist results ────────────────────────────────────
