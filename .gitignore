@@ -1,0 +1,39 @@
+# Virtual environments
+tfenv/
+venv/
+.venv/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Model checkpoints, training data & results (do not commit)
+checkpoints/
+data/
+results/
+
+# Internal project notes (not for public repo)
+CLAUDE.md
+PLAN.md
+paper/experiment_report.md
+
+# Claude Code
+.claude/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TensorBoard event files
+*.tfevents*
+
+# Jupyter
+.ipynb_checkpoints/

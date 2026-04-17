@@ -1,0 +1,32 @@
+# Vanilla BERT-base configuration — comparison baseline (no token dropping).
+#
+# Overrides for task.model.encoder.bert.*
+# Field names follow official.nlp.configs.encoders.BertEncoderConfig
+# (tf-models-official 2.16+).  All BERT-base architecture params are set
+# here so the same values apply regardless of the Python-config defaults.
+#
+# Usage with train.py:
+#   python train.py \
+#     --experiment=vanilla_bert/pretraining \
+#     --config_file=wiki_books_pretrain_sequence_pack.yaml \
+#     --config_file=bert_en_uncased_base_vanilla.yaml \
+#     --params_override="trainer.train_steps=10000,..." \
+#     --model_dir=./checkpoints/pilot_vanilla/
+
+task:
+  model:
+    encoder:
+      type: bert
+      bert:
+        vocab_size: 30522
+        hidden_size: 768
+        num_layers: 12
+        num_attention_heads: 12
+        max_sequence_length: 512
+        type_vocab_size: 2
+        intermediate_size: 3072
+        inner_activation: gelu
+        output_dropout: 0.1
+        attention_dropout: 0.1
+        initializer_range: 0.02
+        norm_first: false
